@@ -1,24 +1,34 @@
-from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
-import datetime
-from flask import current_app
+from functools import wraps
+from flask import jsonify
+from flask_jwt_extended import get_jwt, verify_jwt_in_request
 
-def hash_password(password):
-    return generate_password_hash(password)
+def role_required(required_roles):
+    """
+    Decorator for requiring specific roles
+    Usage: @role_required(['admin']) or @role_required(['admin', 'provider'])
+    """
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            verify_jwt_in_request()
+            claims = get_jwt()
+            user_role = claims.get('role')
+            
+            if user_role not in required_roles:
+                return jsonify({
+                    'error': 'Insufficient permissions',
+                    'message': f'Required roles: {required_roles}'
+                }), 403
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
-def verify_password(password, hashed_password):
-    return check_password_hash(hashed_password, password)
+# Specific role decorators
+def admin_required(f):
+    return role_required(['admin'])(f)
 
-def generate_token(user_id):
-    token = jwt.encode({
-        'user_id': user_id,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)
-    }, current_app.config['SECRET_KEY'], algorithm='HS256')
-    return token
+def provider_required(f):
+    return role_required(['provider', 'admin'])(f)
 
-def decode_token(token):
-    try:
-        data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
-        return data['user_id']
-    except Exception:
-        return None
+def client_required(f):
+    return role_required(['client', 'admin'])(f)
