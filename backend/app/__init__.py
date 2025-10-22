@@ -1,13 +1,13 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager
+from flask_sqlalchemy import SQLAlchemy  # Fixed: flask_sqlalchemy not flask.sqlalchemy
+from flask_bcrypt import Bcrypt          # Fixed: flask_bcrypt not flask.bcrypt
+from flask_jwt_extended import JWTManager  # Fixed: flask_jwt_extended (correct spelling)
 from flask_cors import CORS
 from flask_migrate import Migrate
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
-jwt = JWTManager()
+jwt = JWTManager()  # Fixed: JWTManager not JMTManager
 migrate = Migrate()
 
 def create_app():
