@@ -1,4 +1,5 @@
 from flask_swagger_ui import get_swaggerui_blueprint
+from flask import jsonify
 
 SWAGGER_URL = '/api/docs'
 API_URL = '/api/swagger.json'
