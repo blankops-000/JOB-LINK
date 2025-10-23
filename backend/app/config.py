@@ -13,8 +13,8 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///joblink.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # CORS
-    CORS_ORIGINS = ["http://localhost:3000"]  # React frontend URL
+    # ✅ FIXED: CORS configuration as a list
+    CORS_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
     
     # File Upload
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file upload
@@ -32,4 +32,4 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     """Testing-specific configuration"""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # In-memory database for tests
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
