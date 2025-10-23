@@ -1,4 +1,4 @@
-# ...existing code...
+
 import base64
 from datetime import datetime
 import requests
@@ -191,4 +191,3 @@ class MpesaService:
             except Exception:
                 pass
             return {'success': False, 'error': str(exc)}
-# ...existing code...
