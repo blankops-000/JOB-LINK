@@ -1,4 +1,4 @@
-# ✅ CORRECT IMPORTS:
+#  CORRECT IMPORTS:
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -28,7 +28,7 @@ def create_app():
     jwt.init_app(app)
     migrate.init_app(app, db)
     
-    # ✅ FIXED: Configure CORS properly
+    # FIXED: Configure CORS properly
     cors.init_app(app, resources={
         r"/api/*": {
             "origins": app.config.get('CORS_ORIGINS', ['http://localhost:3000'])
@@ -42,12 +42,12 @@ def create_app():
             from app.routes.auth import auth_bp
             app.register_blueprint(auth_bp, url_prefix='/api/auth')
         except ImportError:
-            print("⚠️  Auth routes not yet created - skipping")
+            print("  Auth routes not yet created - skipping")
             
         try:
             from app.routes.users import users_bp
             app.register_blueprint(users_bp, url_prefix='/api/users')
         except ImportError:
-            print("⚠️  User routes not yet created - skipping")
+            print(" User routes not yet created - skipping")
     
     return app
