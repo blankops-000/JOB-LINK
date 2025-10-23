@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.user import User
 from app.utils.errors import APIError, validation_error, not_found_error
+from app.utils.rbac import require_admin, require_provider_or_admin
 
 services_bp = Blueprint('services', __name__)
 
@@ -123,11 +124,14 @@ def update_service(service_id):
 
 @services_bp.route('/<int:service_id>', methods=['DELETE'])
 @jwt_required()
+@require_admin
 def delete_service(service_id):
     """
-    Delete service
+    Delete service (Admin only)
     ---
     tags:
       - Services
+    security:
+      - Bearer: []
     """
     return jsonify({'message': 'Service deleted successfully'})
