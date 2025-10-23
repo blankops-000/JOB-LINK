@@ -13,12 +13,12 @@ const Home = () => {
             Connect with trusted professionals for plumbing, cleaning, tutoring, and more. Book services with confidence.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+            <a href="/services" className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-center">
               Find Services
-            </button>
-            <button className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-lg hover:bg-blue-50 transition-colors font-semibold">
+            </a>
+            <a href="/signup" className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-lg hover:bg-blue-50 transition-colors font-semibold text-center">
               Become a Provider
-            </button>
+            </a>
           </div>
         </div>
       </section>
@@ -82,9 +82,9 @@ const Home = () => {
           <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
             Join thousands of satisfied customers who trust JobLink for their service needs.
           </p>
-          <button className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors font-semibold">
+          <a href="/signup" className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors font-semibold inline-block">
             Sign Up Now
-          </button>
+          </a>
         </div>
       </section>
     </div>
