@@ -1,7 +1,9 @@
 import os
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'a_default_secret_key'
-    DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///site.db'
-    DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-    TESTING = os.environ.get('TESTING', 'False') == 'True'
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL",
+        "postgresql://postgres:your_password@localhost/job_link_db"
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
