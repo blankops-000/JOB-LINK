@@ -23,3 +23,12 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    # M-Pesa Configuration (Sandbox - for testing)
+MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY', 'your_sandbox_consumer_key')
+MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET', 'your_sandbox_consumer_secret')
+MPESA_BUSINESS_SHORTCODE = os.environ.get('MPESA_BUSINESS_SHORTCODE', '174379')  # Sandbox shortcode
+MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY', 'your_sandbox_passkey')
+MPESA_BASE_URL = os.environ.get('MPESA_BASE_URL', 'https://sandbox.safaricom.co.ke')
+
+# Application base URL for callbacks
+BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
