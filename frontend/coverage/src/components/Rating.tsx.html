@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/pages/Home.tsx</title>
+    <title>Code coverage report for src/components/Rating.tsx</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/pages</a> Home.tsx</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/components</a> Rating.tsx</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/0</span>
+                <span class='fraction'>0/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -105,17 +105,13 @@
 <a name='L40'></a><a href='#L40'>40</a>
 <a name='L41'></a><a href='#L41'>41</a>
 <a name='L42'></a><a href='#L42'>42</a>
-<a name='L43'></a><a href='#L43'>43</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -130,6 +126,23 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -146,47 +159,52 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import Hero from '../components/Hero';
-import ServiceCategories from '../components/ServiceCategories';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">interface RatingProps {
+  rating: number;
+  maxRating?: number;
+  size?: 'sm' | 'md' | 'lg';
+  interactive?: boolean;
+  onRatingChange?: (rating: number) =&gt; void;
+}
 &nbsp;
-export default function Home() {
-  return (
-    &lt;div&gt;
-      &lt;Hero /&gt;
-      &lt;ServiceCategories /&gt;
-      
-      {/* Features Section */}
-      &lt;div className="py-16 bg-white"&gt;
-        &lt;div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"&gt;
-          &lt;div className="text-center mb-12"&gt;
-            &lt;h2 className="text-4xl font-bold text-gray-900 mb-4"&gt;Why Choose JobLink?&lt;/h2&gt;
-          &lt;/div&gt;
-          &lt;div className="grid md:grid-cols-3 gap-8"&gt;
-            &lt;div className="text-center p-6"&gt;
-              &lt;div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"&gt;
-                &lt;span className="text-3xl"&gt;🛡️&lt;/span&gt;
-              &lt;/div&gt;
-              &lt;h3 className="text-xl font-semibold mb-2"&gt;Verified Providers&lt;/h3&gt;
-              &lt;p className="text-gray-600"&gt;All service providers are background-checked and verified&lt;/p&gt;
-            &lt;/div&gt;
-            &lt;div className="text-center p-6"&gt;
-              &lt;div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"&gt;
-                &lt;span className="text-3xl"&gt;💳&lt;/span&gt;
-              &lt;/div&gt;
-              &lt;h3 className="text-xl font-semibold mb-2"&gt;Secure Payments&lt;/h3&gt;
-              &lt;p className="text-gray-600"&gt;Safe and secure M-Pesa payment processing&lt;/p&gt;
-            &lt;/div&gt;
-            &lt;div className="text-center p-6"&gt;
-              &lt;div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4"&gt;
-                &lt;span className="text-3xl"&gt;⭐&lt;/span&gt;
-              &lt;/div&gt;
-              &lt;h3 className="text-xl font-semibold mb-2"&gt;Quality Guaranteed&lt;/h3&gt;
-              &lt;p className="text-gray-600"&gt;Read reviews and ratings from real customers&lt;/p&gt;
-            &lt;/div&gt;
-          &lt;/div&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
+export default function <span class="fstat-no" title="function not covered" >Rating({ </span>
+  rating, 
+  maxRating = <span class="branch-0 cbranch-no" title="branch not covered" >5, </span>
+  size = <span class="branch-0 cbranch-no" title="branch not covered" >'md',</span>
+  interactive = <span class="branch-0 cbranch-no" title="branch not covered" >false,</span>
+  onRatingChange 
+}: RatingProps) {
+  const sizes = <span class="cstat-no" title="statement not covered" >{</span>
+    sm: 'w-4 h-4',
+    md: 'w-5 h-5',
+    lg: 'w-6 h-6'
+  };
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return (</span>
+    &lt;div className="flex items-center space-x-1"&gt;
+      {[...Array(maxRating)].map(<span class="fstat-no" title="function not covered" >(_</span>, index) =&gt; {
+        const starValue = <span class="cstat-no" title="statement not covered" >index + 1;</span>
+        const isFilled = <span class="cstat-no" title="statement not covered" >starValue &lt;= rating;</span>
+        
+<span class="cstat-no" title="statement not covered" >        return (</span>
+          &lt;button
+            key={index}
+            type="button"
+            onClick={<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >i</span>nteractive &amp;&amp; onRatingChange?.(starValue)}</span>
+            disabled={!interactive}
+            className={`${interactive ? 'cursor-pointer hover:scale-110' : 'cursor-default'} transition-transform`}
+          &gt;
+            &lt;svg
+              className={`${sizes[size]} ${isFilled ? 'text-yellow-400' : 'text-gray-300'}`}
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            &gt;
+              &lt;path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /&gt;
+            &lt;/svg&gt;
+          &lt;/button&gt;
+        );
+      })}
+      &lt;span className="ml-2 text-sm text-gray-600"&gt;{rating.toFixed(1)}&lt;/span&gt;
     &lt;/div&gt;
   );
 }</pre></td></tr></table></pre>
