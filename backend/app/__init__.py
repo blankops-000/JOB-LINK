@@ -4,6 +4,7 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_migrate import Migrate
+from app.docs.swagger import swaggerui_blueprint, create_swagger_spec
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -14,6 +15,11 @@ cors = CORS()
 def create_app():
     app = Flask(__name__)
     app.config.from_object('app.config.Config')
+      # Register Swagger UI Blueprint
+    app.register_blueprint(swaggerui_blueprint)
+    
+    # Create Swagger specification
+    create_swagger_spec(app)
     
     db.init_app(app)
     bcrypt.init_app(app)
@@ -64,17 +70,4 @@ def create_app():
     except ImportError:
         print("⚠️  Admin routes not yet created - skipping")
         # Add to imports
-from app.docs.swagger import swaggerui_blueprint, create_swagger_spec
-
-def create_app():
-    app = Flask(__name__)
-    # ... existing configuration ...
-    
-    # Register Swagger UI Blueprint
-    app.register_blueprint(swaggerui_blueprint)
-    
-    # Create Swagger specification
-    create_swagger_spec(app)
-    
-    
     return app

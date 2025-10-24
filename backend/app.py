@@ -1,4 +1,4 @@
-# app/__init__.py
+
 from flask import Flask, jsonify
 from .extensions import db, migrate
 from .routes.job_routes import job_bp
