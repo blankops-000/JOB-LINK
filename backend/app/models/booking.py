@@ -1,25 +1,22 @@
-class Booking:
-    def __init__(self, booking_id, user_id, date):
-        self.booking_id = booking_id
-        self.user_id = user_id
-        self.date = date
+from app import db
+from datetime import datetime
+import uuid
 
-    def create_booking(self):
-        # Logic to create a booking
-        pass
+def generate_uuid():
+    return str(uuid.uuid4())
 
-    def update_booking(self):
-        # Logic to update a booking
-        pass
+class Booking(db.Model):
+    __tablename__ = 'bookings'
 
-    def delete_booking(self):
-        # Logic to delete a booking
-        pass
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    customer_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
+    provider_id = db.Column(db.String, db.ForeignKey('provider_profiles.id'), nullable=False)
+    service_date = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.String(50), default='pending')
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    def get_booking_details(self):
-        # Logic to get booking details
-        return {
-            "booking_id": self.booking_id,
-            "user_id": self.user_id,
-            "date": self.date
-        }
+    payments = db.relationship('Payment', backref='booking', lazy=True)
+    reviews = db.relationship('Review', backref='booking', lazy=True)
+    notifications = db.relationship('Notification', backref='booking', lazy=True)

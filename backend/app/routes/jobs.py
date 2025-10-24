@@ -1,70 +1,60 @@
 from flask import Blueprint, request, jsonify
-from ..extensions import db
-from ..models.job import Job
+from app.extensions import db
+from app.models.job import Job
+from flask_jwt_extended import jwt_required
 
-jobs_bp = Blueprint("jobs", __name__)
+jobs_bp = Blueprint('jobs', __name__, url_prefix='/jobs')
 
-#  Create a new job
-@jobs_bp.route("/", methods=["POST"])
-def create_job():
-    data = request.get_json()
-    required_fields = ["title", "company", "location", "description"]
-
-    # Validation
-    if not all(field in data and data[field] for field in required_fields):
-        return jsonify({"error": "Missing required fields"}), 400
-
-    job = Job(
-        title=data["title"],
-        company=data["company"],
-        location=data["location"],
-        description=data["description"],
-        salary=data.get("salary"),
-    )
-    db.session.add(job)
-    db.session.commit()
-    return jsonify(job.to_dict()), 201
-
-
-#  Read (List all jobs with pagination)
-@jobs_bp.route("/", methods=["GET"])
+# GET all jobs (with pagination)
+@jobs_bp.route('/', methods=['GET'])
 def get_jobs():
-    page = int(request.args.get("page", 1))
-    per_page = int(request.args.get("per_page", 5))
-    jobs = Job.query.paginate(page=page, per_page=per_page, error_out=False)
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    jobs = Job.query.paginate(page=page, per_page=per_page)
     return jsonify({
         "jobs": [job.to_dict() for job in jobs.items],
         "total": jobs.total,
         "pages": jobs.pages,
-        "current_page": jobs.page
-    })
+    }), 200
 
-
-#  Get a single job
-@jobs_bp.route("/<int:id>", methods=["GET"])
+# GET a single job by ID
+@jobs_bp.route('/<int:id>', methods=['GET'])
 def get_job(id):
     job = Job.query.get_or_404(id)
-    return jsonify(job.to_dict())
+    return jsonify(job.to_dict()), 200
 
+# CREATE a job
+@jobs_bp.route('/', methods=['POST'])
+@jwt_required()
+def create_job():
+    data = request.get_json()
+    title = data.get('title')
+    description = data.get('description')
 
-#  Update a job
-@jobs_bp.route("/<int:id>", methods=["PUT"])
+    if not title or not description:
+        return jsonify({"error": "Title and description required"}), 400
+
+    job = Job(title=title, description=description)
+    db.session.add(job)
+    db.session.commit()
+    return jsonify(job.to_dict()), 201
+
+# UPDATE a job
+@jobs_bp.route('/<int:id>', methods=['PATCH'])
+@jwt_required()
 def update_job(id):
     job = Job.query.get_or_404(id)
     data = request.get_json()
-
-    for field in ["title", "company", "location", "description", "salary"]:
-        if field in data:
-            setattr(job, field, data[field])
-
+    job.title = data.get('title', job.title)
+    job.description = data.get('description', job.description)
     db.session.commit()
-    return jsonify(job.to_dict())
+    return jsonify(job.to_dict()), 200
 
-
-#  Delete a job
-@jobs_bp.route("/<int:id>", methods=["DELETE"])
+# DELETE a job
+@jobs_bp.route('/<int:id>', methods=['DELETE'])
+@jwt_required()
 def delete_job(id):
     job = Job.query.get_or_404(id)
     db.session.delete(job)
     db.session.commit()
-    return jsonify({"message": "Job deleted successfully"})
+    return jsonify({"message": "Job deleted"}), 200
