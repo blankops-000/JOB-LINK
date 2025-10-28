@@ -49,6 +49,12 @@ def create_app():
             app.register_blueprint(providers_bp, url_prefix='/api/providers')
         except ImportError:
             print("Provider routes not yet created - skipping")
+            
+        try:
+            from app.routes.services import services_bp
+            app.register_blueprint(services_bp, url_prefix='/api/services')
+        except ImportError:
+            print("Services routes not yet created - skipping")
 
         
     
