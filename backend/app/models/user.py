@@ -32,23 +32,7 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # RELATIONSHIPS - Define how this model connects to other models
-    
-    # One-to-one relationship: One user can have one provider profile
-    # 'uselist=False' ensures it's a single object, not a list
-    # 'cascade' means if user is deleted, their provider profile is automatically deleted
-    provider_profile = db.relationship('ProviderProfile', backref='user', uselist=False, cascade="all, delete-orphan")
-    
-    # One-to-many: A user can have many bookings as a client
-    # 'foreign_keys' specifies which foreign key to use for this relationship
-    # 'lazy=dynamic' means the relationship returns a query that can be filtered further
-    bookings_as_client = db.relationship('Booking', foreign_keys='Booking.client_id', backref='client', lazy='dynamic')
-    
-    # One-to-many: A user can have many bookings as a provider
-    bookings_as_provider = db.relationship('Booking', foreign_keys='Booking.provider_id', backref='provider', lazy='dynamic')
-    
-    # One-to-many: A user can write many reviews
-    reviews_written = db.relationship('Review', foreign_keys='Review.client_id', backref='author', lazy='dynamic')
+    # RELATIONSHIPS will be added when other models are created
     
     # METHOD: Hash and store password securely
     def set_password(self, password):
