@@ -9,25 +9,27 @@ auth_bp = Blueprint('auth', __name__)  # This creates the auth_bp variable
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json() or {}
-    first_name = data.get('first_name')
-    last_name = data.get('last_name')
     email = data.get('email')
     password = data.get('password')
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
+    phone = data.get('phone')
     role = data.get('role')
 
-    if not first_name or not last_name or not email or not password:
-        return jsonify({'msg': 'first_name, last_name, email and password are required'}), 400
+    if not email or not password or not first_name or not last_name:
+        return jsonify({'msg': 'email, password, first_name and last_name are required'}), 400
 
     # check for existing user by email
     existing = User.query.filter(User.email == email).first()
     if existing:
         return jsonify({'msg': 'user with given email already exists'}), 409
 
-    # create user
+    # Create user with hashed password
     user = User(
+        email=email,
         first_name=first_name,
         last_name=last_name,
-        email=email
+        phone=phone
     )
     user.set_password(password)
 
@@ -53,20 +55,20 @@ def register():
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
-    identifier = data.get('email') or data.get('identifier')
+    email = data.get('email')
     password = data.get('password')
 
-    if not identifier or not password:
+    if not email or not password:
         return jsonify({'msg': 'email and password required'}), 400
 
-    user = User.query.filter(User.email == identifier).first()
+    user = User.query.filter(User.email == email).first()
     if not user:
         return jsonify({'msg': 'invalid credentials'}), 401
 
     if not user.check_password(password):
         return jsonify({'msg': 'invalid credentials'}), 401
 
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
     user_info = user.to_dict()
 
     return jsonify({'access_token': access_token, 'user': user_info}), 200
@@ -75,7 +77,7 @@ def login():
 @jwt_required()
 def get_current_user():
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    user = User.query.get(int(current_user_id))
     if not user:
         return jsonify({'msg': 'user not found'}), 404
 
