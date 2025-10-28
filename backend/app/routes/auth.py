@@ -9,27 +9,27 @@ auth_bp = Blueprint('auth', __name__)  # This creates the auth_bp variable
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json() or {}
-    username = data.get('username')
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
     email = data.get('email')
     password = data.get('password')
     role = data.get('role')
 
-    if not username or not email or not password:
-        return jsonify({'msg': 'username, email and password are required'}), 400
+    if not first_name or not last_name or not email or not password:
+        return jsonify({'msg': 'first_name, last_name, email and password are required'}), 400
 
-    # check for existing user by username or email
-    existing = User.query.filter((User.username == username) | (User.email == email)).first()
+    # check for existing user by email
+    existing = User.query.filter(User.email == email).first()
     if existing:
-        return jsonify({'msg': 'user with given username or email already exists'}), 409
+        return jsonify({'msg': 'user with given email already exists'}), 409
 
-    # hash password
-    try:
-        pw_hash = bcrypt.generate_password_hash(password).decode('utf-8')
-    except Exception:
-        # fallback if generate_password_hash returns a str already
-        pw_hash = bcrypt.generate_password_hash(password)
-
-    user = User(username=username, email=email, password=pw_hash)
+    # create user
+    user = User(
+        first_name=first_name,
+        last_name=last_name,
+        email=email
+    )
+    user.set_password(password)
 
     # attempt to set role if provided and valid
     if role:
@@ -47,32 +47,27 @@ def register():
 
     return jsonify({
         'msg': 'user registered',
-        'user': {'id': user.id, 'username': user.username, 'email': user.email}
+        'user': user.to_dict()
     }), 201
 
-@auth_bp.route('/login', methods=['POST'])  
+@auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
-    identifier = data.get('email') or data.get('username') or data.get('identifier')
+    identifier = data.get('email') or data.get('identifier')
     password = data.get('password')
 
     if not identifier or not password:
-        return jsonify({'msg': 'identifier and password required'}), 400
+        return jsonify({'msg': 'email and password required'}), 400
 
-    user = User.query.filter((User.email == identifier) | (User.username == identifier)).first()
+    user = User.query.filter(User.email == identifier).first()
     if not user:
         return jsonify({'msg': 'invalid credentials'}), 401
 
-    if not bcrypt.check_password_hash(user.password, password):
+    if not user.check_password(password):
         return jsonify({'msg': 'invalid credentials'}), 401
 
     access_token = create_access_token(identity=user.id)
-    user_info = {'id': user.id, 'username': user.username, 'email': user.email}
-    if hasattr(user, 'role') and user.role is not None:
-        try:
-            user_info['role'] = user.role.name
-        except Exception:
-            user_info['role'] = str(user.role)
+    user_info = user.to_dict()
 
     return jsonify({'access_token': access_token, 'user': user_info}), 200
 
@@ -84,11 +79,4 @@ def get_current_user():
     if not user:
         return jsonify({'msg': 'user not found'}), 404
 
-    user_info = {'id': user.id, 'username': user.username, 'email': user.email}
-    if hasattr(user, 'role') and user.role is not None:
-        try:
-            user_info['role'] = user.role.name
-        except Exception:
-            user_info['role'] = str(user.role)
-
-    return jsonify({'user': user_info}), 200
+    return jsonify({'user': user.to_dict()}), 200
