@@ -6,7 +6,8 @@ import Button from '../components/Button';
 
 export default function Register() {
   const [formData, setFormData] = useState({
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -31,7 +32,7 @@ export default function Register() {
       await authService.register(formData);
       navigate('/login', { state: { message: 'Registration successful! Please login.' } });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.msg || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -60,12 +61,20 @@ export default function Register() {
           )}
           
           <div className="space-y-4">
-            <Input
-              label="Full Name"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              required
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="First Name"
+                value={formData.first_name}
+                onChange={(e) => setFormData({...formData, first_name: e.target.value})}
+                required
+              />
+              <Input
+                label="Last Name"
+                value={formData.last_name}
+                onChange={(e) => setFormData({...formData, last_name: e.target.value})}
+                required
+              />
+            </div>
             
             <Input
               label="Email Address"
