@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from app import db
 from datetime import datetime
 
@@ -50,3 +51,18 @@ class ProviderProfile(db.Model):
             'experience_years': self.experience_years,
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
+    @classmethod
+    def rating_summary(cls, provider_id, session=None):
+        """
+        Return aggregated rating stats for a provider:
+          { 'rating_count': int, 'rating_avg': float }
+        Uses a DB aggregate for performance. Safe to call from routes.
+        """
+        session = session or db.session
+        # import here to avoid circular import at module load
+        from app.models.review import Review
+        row = session.query(
+            func.count(Review.id).label('rating_count'),
+            func.avg(Review.rating).label('rating_avg')
+        ).filter(Review.provider_id == provider_id).one()
+        return {'rating_count': int(row.rating_count or 0), 'rating_avg': float(row.rating_avg or 0.0)}
