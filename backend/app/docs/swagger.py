@@ -440,8 +440,63 @@ def create_swagger_spec(app):
                     }
                 },
                 
+                # Services endpoints
+                "/api/services": {
+                    "get": {
+                        "summary": "Get all service categories",
+                        "description": "Get paginated list of service categories with search",
+                        "tags": ["Services"],
+                        "parameters": [
+                            {"name": "page", "in": "query", "schema": {"type": "integer", "default": 1}},
+                            {"name": "per_page", "in": "query", "schema": {"type": "integer", "default": 10}},
+                            {"name": "search", "in": "query", "schema": {"type": "string"}}
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "Services retrieved successfully",
+                                "content": {"application/json": {"example": {"services": [], "pagination": {}}}}
+                            }
+                        }
+                    },
+                    "post": {
+                        "summary": "Create service category",
+                        "description": "Create new service category (admin only)",
+                        "tags": ["Services"],
+                        "security": [{"BearerAuth": []}],
+                        "requestBody": {
+                            "required": True,
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "required": ["name"],
+                                        "properties": {
+                                            "name": {"type": "string", "example": "Plumbing"},
+                                            "description": {"type": "string", "example": "Professional plumbing services"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "responses": {"201": {"description": "Service created successfully"}}
+                    }
+                },
+                
                 # Bookings endpoints
                 "/api/bookings": {
+                    "get": {
+                        "summary": "Get user bookings",
+                        "description": "Get bookings for current user (client sees their bookings, provider sees bookings for them)",
+                        "tags": ["Bookings"],
+                        "security": [{"BearerAuth": []}],
+                        "parameters": [
+                            {"name": "page", "in": "query", "schema": {"type": "integer", "default": 1}},
+                            {"name": "status", "in": "query", "schema": {"type": "string", "enum": ["pending", "confirmed", "in_progress", "completed", "cancelled"]}}
+                        ],
+                        "responses": {
+                            "200": {"description": "Bookings retrieved successfully"}
+                        }
+                    },
                     "post": {
                         "summary": "Create a new booking",
                         "description": "Create a service booking (client role required)",
@@ -455,61 +510,158 @@ def create_swagger_spec(app):
                                         "type": "object",
                                         "required": ["provider_id", "service_category_id", "scheduled_date", "duration_hours", "address"],
                                         "properties": {
-                                            "provider_id": {
-                                                "type": "integer",
-                                                "example": 2,
-                                                "description": "ID of the service provider"
-                                            },
-                                            "service_category_id": {
-                                                "type": "integer", 
-                                                "example": 1,
-                                                "description": "ID of the service category"
-                                            },
-                                            "scheduled_date": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                                "example": "2024-12-25T10:00:00Z",
-                                                "description": "When the service is scheduled"
-                                            },
-                                            "duration_hours": {
-                                                "type": "integer",
-                                                "example": 2,
-                                                "description": "Duration of service in hours"
-                                            },
-                                            "address": {
-                                                "type": "string",
-                                                "example": "123 Main Street, Nairobi",
-                                                "description": "Where the service will be performed"
-                                            },
-                                            "special_requests": {
-                                                "type": "string",
-                                                "example": "Please bring all necessary tools",
-                                                "description": "Any special requirements (optional)"
-                                            }
+                                            "provider_id": {"type": "integer", "example": 2},
+                                            "service_category_id": {"type": "integer", "example": 1},
+                                            "scheduled_date": {"type": "string", "format": "date-time", "example": "2024-12-25T10:00:00Z"},
+                                            "duration_hours": {"type": "integer", "example": 2},
+                                            "address": {"type": "string", "example": "123 Main Street, Nairobi"},
+                                            "special_requests": {"type": "string", "example": "Please bring tools"}
                                         }
                                     }
                                 }
                             }
                         },
+                        "responses": {"201": {"description": "Booking created successfully"}}
+                    }
+                },
+                
+                "/api/bookings/{booking_id}": {
+                    "get": {
+                        "summary": "Get booking details",
+                        "tags": ["Bookings"],
+                        "security": [{"BearerAuth": []}],
+                        "parameters": [{"name": "booking_id", "in": "path", "required": True, "schema": {"type": "integer"}}],
+                        "responses": {"200": {"description": "Booking details retrieved"}}
+                    },
+                    "put": {
+                        "summary": "Update booking status",
+                        "tags": ["Bookings"],
+                        "security": [{"BearerAuth": []}],
+                        "parameters": [{"name": "booking_id", "in": "path", "required": True, "schema": {"type": "integer"}}],
+                        "requestBody": {
+                            "required": True,
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "status": {"type": "string", "enum": ["confirmed", "in_progress", "completed", "cancelled"]}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "responses": {"200": {"description": "Booking updated successfully"}}
+                    }
+                },
+                
+                # Reviews endpoints
+                "/api/reviews": {
+                    "post": {
+                        "summary": "Create a review",
+                        "description": "Create review for completed booking (client only)",
+                        "tags": ["Reviews"],
+                        "security": [{"BearerAuth": []}],
+                        "requestBody": {
+                            "required": True,
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "required": ["booking_id", "rating"],
+                                        "properties": {
+                                            "booking_id": {"type": "integer", "example": 1},
+                                            "rating": {"type": "integer", "minimum": 1, "maximum": 5, "example": 5},
+                                            "comment": {"type": "string", "example": "Excellent service!"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "responses": {"201": {"description": "Review created successfully"}}
+                    }
+                },
+                
+                "/api/reviews/provider/{provider_id}": {
+                    "get": {
+                        "summary": "Get provider reviews",
+                        "tags": ["Reviews"],
+                        "parameters": [
+                            {"name": "provider_id", "in": "path", "required": True, "schema": {"type": "integer"}},
+                            {"name": "page", "in": "query", "schema": {"type": "integer", "default": 1}}
+                        ],
+                        "responses": {"200": {"description": "Reviews retrieved successfully"}}
+                    }
+                },
+                
+                # Admin endpoints
+                "/api/admin/stats": {
+                    "get": {
+                        "summary": "Get platform statistics",
+                        "description": "Get comprehensive platform analytics (admin only)",
+                        "tags": ["Admin"],
+                        "security": [{"BearerAuth": []}],
                         "responses": {
-                            "201": {
-                                "description": "Booking created successfully",
+                            "200": {
+                                "description": "Statistics retrieved successfully",
                                 "content": {
                                     "application/json": {
                                         "example": {
-                                            "message": "Booking created successfully",
-                                            "booking": {
-                                                "id": 1,
-                                                "scheduled_date": "2024-12-25T10:00:00Z",
-                                                "duration_hours": 2,
-                                                "total_amount": 51.00,
-                                                "status": "pending"
-                                            }
+                                            "users": {"total": 150, "clients": 120, "providers": 25, "admins": 5},
+                                            "bookings": {"total": 89, "pending": 12, "completed": 67},
+                                            "revenue": {"total": 15420.50, "this_month": 3240.75}
                                         }
                                     }
                                 }
                             }
                         }
+                    }
+                },
+                
+                "/api/admin/users": {
+                    "get": {
+                        "summary": "Get all users",
+                        "description": "Get paginated list of all users (admin only)",
+                        "tags": ["Admin"],
+                        "security": [{"BearerAuth": []}],
+                        "parameters": [
+                            {"name": "page", "in": "query", "schema": {"type": "integer", "default": 1}},
+                            {"name": "role", "in": "query", "schema": {"type": "string", "enum": ["client", "provider", "admin"]}}
+                        ],
+                        "responses": {"200": {"description": "Users retrieved successfully"}}
+                    }
+                },
+                
+                "/api/admin/users/{user_id}": {
+                    "put": {
+                        "summary": "Update user",
+                        "description": "Update user details (admin only)",
+                        "tags": ["Admin"],
+                        "security": [{"BearerAuth": []}],
+                        "parameters": [{"name": "user_id", "in": "path", "required": True, "schema": {"type": "integer"}}],
+                        "requestBody": {
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "first_name": {"type": "string"},
+                                            "last_name": {"type": "string"},
+                                            "is_verified": {"type": "boolean"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "responses": {"200": {"description": "User updated successfully"}}
+                    },
+                    "delete": {
+                        "summary": "Delete user",
+                        "description": "Delete user account (admin only)",
+                        "tags": ["Admin"],
+                        "security": [{"BearerAuth": []}],
+                        "parameters": [{"name": "user_id", "in": "path", "required": True, "schema": {"type": "integer"}}],
+                        "responses": {"200": {"description": "User deleted successfully"}}
                     }
                 }
             },
@@ -602,9 +754,15 @@ def create_swagger_spec(app):
                 }
             },
             
-            # Default security requirement for all endpoints
-            # Individual endpoints can override this if they don't require authentication
-            "security": [{"BearerAuth": []}]
+            # Tags for organizing endpoints in Swagger UI
+            "tags": [
+                {"name": "Authentication", "description": "User authentication and profile management"},
+                {"name": "Services", "description": "Service category management"},
+                {"name": "Providers", "description": "Service provider profiles and search"},
+                {"name": "Bookings", "description": "Service booking management"},
+                {"name": "Reviews", "description": "Rating and review system"},
+                {"name": "Admin", "description": "Administrative functions and analytics"}
+            ]
         }
         
         return jsonify(swagger_spec)
