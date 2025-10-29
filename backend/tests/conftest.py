@@ -30,6 +30,9 @@ def app():
     # Initialize extensions
     db.init_app(app)
     
+    from flask_jwt_extended import JWTManager
+    jwt = JWTManager(app)
+    
     # Register routes that work
     with app.app_context():
         db.create_all()
@@ -48,17 +51,26 @@ def app():
         try:
             from app.routes.reviews import reviews_bp
             app.register_blueprint(reviews_bp, url_prefix='/api/reviews')
-            print("✅ Reviews routes registered")
+            print("[OK] Reviews routes registered")
         except ImportError as e:
-            print(f"⚠️  Skipping reviews routes: {e}")
+            print(f"[WARN] Skipping reviews routes: {e}")
         
         # Try to register admin routes (skip if broken)  
         try:
             from app.routes.admin import admin_bp
             app.register_blueprint(admin_bp, url_prefix='/api/admin')
-            print("✅ Admin routes registered")
+            print("[OK] Admin routes registered")
         except ImportError as e:
-            print(f"⚠️  Skipping admin routes: {e}")
+            print(f"[WARN] Skipping admin routes: {e}")
+            
+        # Register Swagger routes
+        try:
+            from app.docs.swagger import swaggerui_blueprint, create_swagger_spec
+            app.register_blueprint(swaggerui_blueprint)
+            create_swagger_spec(app)
+            print("[OK] Swagger routes registered")
+        except ImportError as e:
+            print(f"[WARN] Skipping swagger routes: {e}")
     
     yield app
     
