@@ -25,7 +25,12 @@ def register():
         return jsonify({'msg': 'user with given email already exists'}), 409
 
     # Create user with hashed password
-    user = User(email=email, first_name=first_name, last_name=last_name, phone=phone)
+    user = User(
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+        phone=phone
+    )
     user.set_password(password)
 
     # attempt to set role if provided and valid
@@ -44,10 +49,10 @@ def register():
 
     return jsonify({
         'msg': 'user registered',
-        'user': {'id': user.id, 'email': user.email, 'first_name': user.first_name, 'last_name': user.last_name}
+        'user': user.to_dict()
     }), 201
 
-@auth_bp.route('/login', methods=['POST'])  
+@auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
     email = data.get('email')
@@ -64,12 +69,7 @@ def login():
         return jsonify({'msg': 'invalid credentials'}), 401
 
     access_token = create_access_token(identity=str(user.id))
-    user_info = {'id': user.id, 'email': user.email, 'first_name': user.first_name, 'last_name': user.last_name}
-    if hasattr(user, 'role') and user.role is not None:
-        try:
-            user_info['role'] = user.role.value
-        except Exception:
-            user_info['role'] = str(user.role)
+    user_info = user.to_dict()
 
     return jsonify({'access_token': access_token, 'user': user_info}), 200
 
@@ -81,11 +81,4 @@ def get_current_user():
     if not user:
         return jsonify({'msg': 'user not found'}), 404
 
-    user_info = {'id': user.id, 'email': user.email, 'first_name': user.first_name, 'last_name': user.last_name}
-    if hasattr(user, 'role') and user.role is not None:
-        try:
-            user_info['role'] = user.role.value
-        except Exception:
-            user_info['role'] = str(user.role)
-
-    return jsonify({'user': user_info}), 200
+    return jsonify({'user': user.to_dict()}), 200
