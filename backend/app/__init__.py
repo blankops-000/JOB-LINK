@@ -73,6 +73,7 @@ def create_app():
     try:
         from app.routes.admin import admin_bp
         app.register_blueprint(admin_bp, url_prefix='/api/admin')
+        print("Admin routes registered successfully")
     except ImportError:
         print("Admin routes not yet created - skipping")
         # Add to imports
