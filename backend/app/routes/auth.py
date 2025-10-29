@@ -9,6 +9,8 @@ auth_bp = Blueprint('auth', __name__)  # This creates the auth_bp variable
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json() or {}
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
     email = data.get('email')
     password = data.get('password')
     first_name = data.get('first_name')
@@ -16,33 +18,24 @@ def register():
     phone = data.get('phone')
     role = data.get('role')
 
-    if not email or not password or not first_name or not last_name:
-        return jsonify({'msg': 'email, password, first_name and last_name are required'}), 400
+    if not first_name or not last_name or not email or not password:
+        return jsonify({'msg': 'first_name, last_name, email and password are required'}), 400
 
     # check for existing user by email
     existing = User.query.filter(User.email == email).first()
     if existing:
         return jsonify({'msg': 'user with given email already exists'}), 409
 
-    # Create user with hashed password
-    user = User(
-        email=email,
-        first_name=first_name,
-        last_name=last_name,
-        phone=phone
-    )
+    user = User(first_name=first_name, last_name=last_name, email=email)
     user.set_password(password)
 
     # attempt to set role if provided and valid
     if role:
         try:
-            user.role = RoleEnum[role]
-        except Exception:
-            try:
-                user.role = RoleEnum[role.upper()]
-            except Exception:
-                # ignore invalid role and let model default apply
-                pass
+            user.role = RoleEnum[role.upper()]
+        except (KeyError, AttributeError):
+            # ignore invalid role and let model default apply
+            pass
 
     db.session.add(user)
     db.session.commit()
@@ -68,17 +61,6 @@ def login():
     if not user.check_password(password):
         return jsonify({'msg': 'invalid credentials'}), 401
 
-    access_token = create_access_token(identity=str(user.id))
-    user_info = user.to_dict()
+    access_token = create_access_token(identity=user.id)
+    return jsonify({'access_token': access_token, 'user': user.to_dict()}), 200
 
-    return jsonify({'access_token': access_token, 'user': user_info}), 200
-
-@auth_bp.route('/me', methods=['GET'])
-@jwt_required()
-def get_current_user():
-    current_user_id = get_jwt_identity()
-    user = User.query.get(int(current_user_id))
-    if not user:
-        return jsonify({'msg': 'user not found'}), 404
-
-    return jsonify({'user': user.to_dict()}), 200
