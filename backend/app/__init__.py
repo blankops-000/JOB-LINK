@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -14,7 +15,15 @@ cors = CORS()
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object('app.config.Config')
+    
+    # Load configuration based on environment
+    env = os.environ.get('FLASK_ENV', 'development')
+    if env == 'production':
+        app.config.from_object('app.config.ProductionConfig')
+    elif env == 'testing':
+        app.config.from_object('app.config.TestingConfig')
+    else:
+        app.config.from_object('app.config.DevelopmentConfig')
     
     # Initialize extensions
     db.init_app(app)
@@ -85,5 +94,10 @@ def create_app():
         print("[OK] Admin routes registered")
     except ImportError as e:
         print(f"[WARN] Admin routes import failed: {e}")
+        
+    # Add health check endpoint
+    @app.route('/health')
+    def health_check():
+        return {'status': 'healthy', 'service': 'joblink-backend'}, 200
         
     return app
