@@ -13,6 +13,9 @@ def register():
     last_name = data.get('last_name')
     email = data.get('email')
     password = data.get('password')
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
+    phone = data.get('phone')
     role = data.get('role')
 
     if not first_name or not last_name or not email or not password:
@@ -42,7 +45,7 @@ def register():
         'user': user.to_dict()
     }), 201
 
-@auth_bp.route('/login', methods=['POST'])  
+@auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
     email = data.get('email')

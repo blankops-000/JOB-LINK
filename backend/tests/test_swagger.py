@@ -5,7 +5,7 @@ def test_swagger_endpoints_exist(client):
     """Test that Swagger endpoints are accessible"""
     # Test Swagger UI endpoint
     response = client.get('/api/docs')
-    assert response.status_code in [200, 302, 301]  # Could be redirect or success
+    assert response.status_code in [200, 302, 301, 308]  # Could be redirect or success
     
     # Test Swagger JSON specification endpoint
     response = client.get('/api/swagger.json')
