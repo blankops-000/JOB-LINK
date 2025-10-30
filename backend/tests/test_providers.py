@@ -20,19 +20,25 @@ class TestProviderEndpoints:
         self.app = create_app()
         self.app.config['TESTING'] = True
         self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        self.app.config['JWT_SECRET_KEY'] = 'test-secret-key'
         self.app.config['WTF_CSRF_ENABLED'] = False
         self.client = self.app.test_client()
         
         with self.app.app_context():
+            from flask_jwt_extended import JWTManager
+            jwt = JWTManager(self.app)
+            
             db.create_all()
-            # Create test service categories for provider tests
-            categories = [
-                ServiceCategory(name='Plumbing', description='Pipe services'),
-                ServiceCategory(name='Electrical', description='Wiring services')
-            ]
-            for category in categories:
-                db.session.add(category)
-            db.session.commit()
+            # Create test service categories (check if they exist first)
+            existing_plumbing = ServiceCategory.query.filter_by(name='Plumbing').first()
+            if not existing_plumbing:
+                categories = [
+                    ServiceCategory(name='Plumbing', description='Pipe services'),
+                    ServiceCategory(name='Electrical', description='Wiring services')
+                ]
+                for category in categories:
+                    db.session.add(category)
+                db.session.commit()
     
     def teardown_method(self):
         """Cleanup test environment"""
@@ -50,10 +56,16 @@ class TestProviderEndpoints:
             'last_name': 'Smith',
             'role': 'provider'
         }
-        response = self.client.post('/api/auth/register',
-                                  data=json.dumps(user_data),
-                                  content_type='application/json')
-        auth_data = json.loads(response.data)
+        self.client.post('/api/auth/register',
+                        data=json.dumps(user_data),
+                        content_type='application/json')
+        
+        # Login to get token
+        login_data = {'email': 'provider@example.com', 'password': 'password123'}
+        login_response = self.client.post('/api/auth/login',
+                                        data=json.dumps(login_data),
+                                        content_type='application/json')
+        auth_data = json.loads(login_response.data)
         token = auth_data['access_token']
         
         # Create provider profile
@@ -87,10 +99,16 @@ class TestProviderEndpoints:
             'last_name': 'Smith',
             'role': 'provider'
         }
-        response = self.client.post('/api/auth/register',
-                                  data=json.dumps(user_data),
-                                  content_type='application/json')
-        auth_data = json.loads(response.data)
+        self.client.post('/api/auth/register',
+                        data=json.dumps(user_data),
+                        content_type='application/json')
+        
+        # Login to get token
+        login_data = {'email': 'provider@example.com', 'password': 'password123'}
+        login_response = self.client.post('/api/auth/login',
+                                        data=json.dumps(login_data),
+                                        content_type='application/json')
+        auth_data = json.loads(login_response.data)
         token = auth_data['access_token']
         
         # Create provider profile
@@ -124,10 +142,16 @@ class TestProviderEndpoints:
             'last_name': 'Smith',
             'role': 'provider'
         }
-        response = self.client.post('/api/auth/register',
-                                  data=json.dumps(user_data),
-                                  content_type='application/json')
-        auth_data = json.loads(response.data)
+        self.client.post('/api/auth/register',
+                        data=json.dumps(user_data),
+                        content_type='application/json')
+        
+        # Login to get token
+        login_data = {'email': 'provider@example.com', 'password': 'password123'}
+        login_response = self.client.post('/api/auth/login',
+                                        data=json.dumps(login_data),
+                                        content_type='application/json')
+        auth_data = json.loads(login_response.data)
         token = auth_data['access_token']
         
         profile_data = {

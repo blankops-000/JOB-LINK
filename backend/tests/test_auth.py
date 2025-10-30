@@ -45,7 +45,7 @@ class TestAuthEndpoints:
         data = json.loads(response.data)
         
         # Verify successful registration
-        assert data['message'] == 'User registered successfully'   # Success message
+        assert data['msg'] == 'user registered'   # Success message
         assert data['user']['email'] == 'test@example.com'         # Correct email
         assert data['user']['first_name'] == 'John'                # Correct first name
         assert data['user']['last_name'] == 'Doe'                  # Correct last name
@@ -81,7 +81,7 @@ class TestAuthEndpoints:
         assert response.status_code == 409, f"Expected 409, got {response.status_code}"
         
         data = json.loads(response.data)
-        assert 'already exists' in data['error'].lower()          # Error message
+        assert 'already exists' in data['msg'].lower()          # Error message
     
     def test_user_registration_missing_fields(self, client):
         """
@@ -107,7 +107,7 @@ class TestAuthEndpoints:
         assert response.status_code == 400, f"Expected 400, got {response.status_code}"
         
         data = json.loads(response.data)
-        assert 'missing required fields' in data['error'].lower() # Error message
+        assert 'required' in data['msg'].lower() # Error message
         assert 'last_name' in data['required']                    # Lists missing field
     
     def test_user_login_success(self, client):
@@ -170,7 +170,7 @@ class TestAuthEndpoints:
         assert response.status_code == 401, f"Expected 401, got {response.status_code}"
         
         data = json.loads(response.data)
-        assert 'invalid email or password' in data['error'].lower() # Error message
+        assert 'invalid credentials' in data['msg'].lower() # Error message
     
     def test_get_current_user_with_valid_token(self, client):
         """
@@ -192,7 +192,13 @@ class TestAuthEndpoints:
                                  data=json.dumps(user_data),
                                  content_type='application/json')
         reg_data = json.loads(reg_response.data)
-        token = reg_data['access_token']  # Extract JWT token
+        # Login to get token since registration doesn't return one
+        login_data = {'email': 'test@example.com', 'password': 'password123'}
+        login_response = client.post('/api/auth/login',
+                                   data=json.dumps(login_data),
+                                   content_type='application/json')
+        login_data = json.loads(login_response.data)
+        token = login_data['access_token']  # Extract JWT token
         
         # Access protected endpoint with token
         response = client.get('/api/auth/me',

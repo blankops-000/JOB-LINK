@@ -5,8 +5,11 @@ const categories = [
   { name: 'Plumbing', icon: '🔧', color: 'bg-green-100 text-green-600', count: '85+ providers' },
   { name: 'Electrical', icon: '⚡', color: 'bg-yellow-100 text-yellow-600', count: '95+ providers' },
   { name: 'Gardening', icon: '🌱', color: 'bg-emerald-100 text-emerald-600', count: '70+ providers' },
+  { name: 'Tutoring', icon: '📚', color: 'bg-indigo-100 text-indigo-600', count: '50+ providers' },
+  { name: 'Cooking', icon: '🍳', color: 'bg-orange-100 text-orange-600', count: '40+ providers' },
+  { name: 'Repair', icon: '🛠️', color: 'bg-red-100 text-red-600', count: '75+ providers' },
   { name: 'Beauty', icon: '💄', color: 'bg-pink-100 text-pink-600', count: '110+ providers' },
-  { name: 'IT Support', icon: '💻', color: 'bg-purple-100 text-purple-600', count: '60+ providers' },
+  
 ];
 
 export default function ServiceCategories() {

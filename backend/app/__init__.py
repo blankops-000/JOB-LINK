@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -14,27 +15,21 @@ cors = CORS()
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object('app.config.Config')
-      # Register Swagger UI Blueprint
-    app.register_blueprint(swaggerui_blueprint)
     
-    # Create Swagger specification
-    create_swagger_spec(app)
+    # Load configuration based on environment
+    env = os.environ.get('FLASK_ENV', 'development')
+    if env == 'production':
+        app.config.from_object('app.config.ProductionConfig')
+    elif env == 'testing':
+        app.config.from_object('app.config.TestingConfig')
+    else:
+        app.config.from_object('app.config.DevelopmentConfig')
     
+    # Initialize extensions
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
-    
-    # Add JWT claims loader to include user role in token
-    @jwt.additional_claims_loader
-    def add_claims_to_jwt(identity):
-        from app.models.user import User
-        # Convert identity back to int for database query
-        user = User.query.get(int(identity))
-        if user:
-            return {'role': user.role.value}
-        return {'role': None}
     
     cors.init_app(app, resources={
         r"/api/*": {
@@ -42,59 +37,88 @@ def create_app():
         }
     })
     
-    with app.app_context():
-        try:
-            from app.routes.auth import auth_bp
-            app.register_blueprint(auth_bp, url_prefix='/api/auth')
-        except ImportError:
-            print("⚠️  Auth routes not yet created - skipping")
-            
-        try:
-            from app.routes.users import users_bp
-            app.register_blueprint(users_bp, url_prefix='/api/users')
-        except ImportError:
-            print("⚠️  User routes not yet created - skipping")
-        try:
-            from app.routes.providers import providers_bp
-            app.register_blueprint(providers_bp, url_prefix='/api/providers')
-        except ImportError:
-            print("⚠️  Provider routes not yet created - skipping")
-
-        
+    # Register Swagger UI Blueprint
+    app.register_blueprint(swaggerui_blueprint)
+    print("[OK] Swagger UI blueprint registered")
     
+    # Create Swagger specification
+    create_swagger_spec(app)
+    print("[OK] Swagger JSON route created")
+    
+    # Register API blueprints
+    try:
+        from app.routes.auth import auth_bp
+        app.register_blueprint(auth_bp, url_prefix='/api/auth')
+        print("[OK] Auth routes registered")
+    except ImportError as e:
+        print(f"[WARN] Auth routes import failed: {e}")
+        
+    try:
+        from app.routes.users import users_bp
+        app.register_blueprint(users_bp, url_prefix='/api/users')
+        print("[OK] User routes registered")
+    except ImportError:
+        print("[WARN] User routes not yet created - skipping")
+        
+    try:
+        from app.routes.providers import providers_bp
+        app.register_blueprint(providers_bp, url_prefix='/api/providers')
+        print("[OK] Provider routes registered")
+    except ImportError as e:
+        print(f"[WARN] Provider routes import failed: {e}")
+        
+    try:
+        from app.routes.services import services_bp
+        app.register_blueprint(services_bp, url_prefix='/api/services')
+        print("[OK] Services routes registered")
+    except ImportError as e:
+        print(f"[WARN] Services routes import failed: {e}")
+
     try:
         from app.routes.bookings import bookings_bp
         app.register_blueprint(bookings_bp, url_prefix='/api/bookings')
-    except ImportError:
-        print("⚠️  Booking routes not yet created - skipping") 
+        print("[OK] Booking routes registered")
+    except ImportError as e:
+        print(f"[WARN] Booking routes import failed: {e}")
 
     try:
         from app.routes.reviews import reviews_bp
         app.register_blueprint(reviews_bp, url_prefix='/api/reviews')
-    except ImportError:
-         print("⚠️  Review routes not yet created - skipping")
+        print("[OK] Review routes registered")
+    except ImportError as e:
+        print(f"[WARN] Review routes import failed: {e}")
 
     try:
         from app.routes.admin import admin_bp
         app.register_blueprint(admin_bp, url_prefix='/api/admin')
-    except ImportError:
-        print("⚠️  Admin routes not yet created - skipping")
-    
+        print("[OK] Admin routes registered")
+    except ImportError as e:
+        print(f"[WARN] Admin routes import failed: {e}")
+        
+    try:
+        from app.routes.integrations import integrations_bp
+        app.register_blueprint(integrations_bp, url_prefix='/api/integrations')
+        print("[OK] Integrations routes registered")
+    except ImportError as e:
+        print(f"[WARN] Integrations routes import failed: {e}")
+        
+    try:
+        from app.routes.geo import geo_bp
+        app.register_blueprint(geo_bp, url_prefix='/api/geo')
+        print("[OK] Geo routes registered")
+    except ImportError as e:
+        print(f"[WARN] Geo routes import failed: {e}")
+        
     try:
         from app.routes.payments import payments_bp
         app.register_blueprint(payments_bp, url_prefix='/api/payments')
-    except ImportError:
-        print("⚠️  Payment routes not yet created - skipping")
-    
-    try:
-        from app.routes.uploads import uploads_bp
-        app.register_blueprint(uploads_bp, url_prefix='/api/uploads')
-    except ImportError:
-        print("⚠️  Upload routes not yet created - skipping")
-    
+        print("[OK] Payments routes registered")
+    except ImportError as e:
+        print(f"[WARN] Payments routes import failed: {e}")
+        
     # Add health check endpoint
     @app.route('/health')
     def health_check():
         return {'status': 'healthy', 'service': 'joblink-backend'}, 200
-    
+        
     return app

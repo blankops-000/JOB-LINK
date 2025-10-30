@@ -1,5 +1,4 @@
-
 # This file makes the utils directory a Python package
-from .mpesa_service import MpesaService
+# M-Pesa service will be implemented by Donaldson
 
-__all__ = ['MpesaService']
+__all__ = []
