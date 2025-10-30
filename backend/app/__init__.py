@@ -6,6 +6,7 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_migrate import Migrate
 from app.docs.swagger import swaggerui_blueprint, create_swagger_spec
+from config import config  # Import the config dictionary
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -13,17 +14,19 @@ jwt = JWTManager()
 migrate = Migrate()
 cors = CORS()
 
-def create_app():
+def create_app(config_name=None):
     app = Flask(__name__)
     
-    # Load configuration based on environment
-    env = os.environ.get('FLASK_ENV', 'development')
-    if env == 'production':
-        app.config.from_object('app.config.ProductionConfig')
-    elif env == 'testing':
-        app.config.from_object('app.config.TestingConfig')
-    else:
-        app.config.from_object('app.config.DevelopmentConfig')
+    # Load configuration
+    if config_name is None:
+        config_name = os.environ.get('FLASK_ENV', 'development')
+    
+    # Load the appropriate configuration class
+    app.config.from_object(config[config_name])
+    
+    # Ensure SQLite uses the instance folder
+    if app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite'):
+        os.makedirs(app.instance_path, exist_ok=True)
     
     # Initialize extensions
     db.init_app(app)
@@ -31,9 +34,13 @@ def create_app():
     jwt.init_app(app)
     migrate.init_app(app, db)
     
+    # Configure CORS to allow requests from frontend
     cors.init_app(app, resources={
         r"/api/*": {
-            "origins": app.config.get('CORS_ORIGINS', ['http://localhost:3000'])
+            "origins": ["http://localhost:5173", "http://localhost:3000"],
+            "supports_credentials": True,
+            "allow_headers": ["Content-Type", "Authorization"],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         }
     })
     
