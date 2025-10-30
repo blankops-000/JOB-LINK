@@ -32,7 +32,8 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # RELATIONSHIPS will be added when other models are created
+    # Relationships
+    provider_profile = db.relationship('ProviderProfile', back_populates='user', uselist=False, cascade='all, delete-orphan')
     
     # METHOD: Hash and store password securely
     def set_password(self, password):

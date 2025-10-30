@@ -1,8 +1,8 @@
-"""Initial models
+"""Initial migration
 
-Revision ID: a25aa2ca8a09
+Revision ID: df99cc210e77
 Revises: 
-Create Date: 2025-10-24 11:39:01.063236
+Create Date: 2025-10-30 18:03:28.299220
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a25aa2ca8a09'
+revision = 'df99cc210e77'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -97,12 +97,14 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('booking_id', sa.Integer(), nullable=False),
     sa.Column('client_id', sa.Integer(), nullable=False),
+    sa.Column('provider_id', sa.Integer(), nullable=False),
     sa.Column('provider_profile_id', sa.Integer(), nullable=False),
     sa.Column('rating', sa.Integer(), nullable=False),
     sa.Column('comment', sa.Text(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['booking_id'], ['bookings.id'], ),
     sa.ForeignKeyConstraint(['client_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['provider_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['provider_profile_id'], ['provider_profiles.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('booking_id')

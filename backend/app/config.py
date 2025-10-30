@@ -11,12 +11,32 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///joblink.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # CORS
-    CORS_ORIGINS = os.environ.get('CORS_ORIGINS', 'http://localhost:3000').split(',')
+    # CORS - Allow both React (3000) and Vite (5173) dev servers
+    CORS_ORIGINS = os.environ.get('CORS_ORIGINS', 'http://localhost:3000,http://localhost:5173').split(',')
     
-    # External Services
+    # Cloudinary Configuration
     CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL')
+    CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
+    CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')
+    CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET')
+    
+    # SendGrid Configuration
     SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+    SENDGRID_FROM_EMAIL = os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@joblink.com')
+    SENDGRID_FROM_NAME = os.environ.get('SENDGRID_FROM_NAME', 'JobLink')
+    
+    # M-Pesa Configuration
+    MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY')
+    MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET')
+    MPESA_BUSINESS_SHORTCODE = os.environ.get('MPESA_BUSINESS_SHORTCODE', '174379')
+    MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY')
+    MPESA_BASE_URL = os.environ.get('MPESA_BASE_URL', 'https://sandbox.safaricom.co.ke')
+    MPESA_CALLBACK_URL = os.environ.get('MPESA_CALLBACK_URL')
+    MPESA_ENVIRONMENT = os.environ.get('MPESA_ENVIRONMENT', 'sandbox')
+    
+    # Application base URL
+    BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 
 class DevelopmentConfig(Config):
     """Development configuration"""

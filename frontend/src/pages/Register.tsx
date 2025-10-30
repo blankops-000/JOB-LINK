@@ -6,12 +6,11 @@ import Button from '../components/Button';
 
 export default function Register() {
   const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'client'
+    role: 'client' as const
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,14 +24,41 @@ export default function Register() {
       return;
     }
 
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
-      await authService.register(formData);
-      navigate('/login', { state: { message: 'Registration successful! Please login.' } });
+      // Split name into first_name and last_name
+      const nameParts = formData.name.trim().split(' ');
+      const first_name = nameParts[0] || '';
+      const last_name = nameParts.slice(1).join(' ') || ' ';
+      
+      const registrationData = {
+        first_name,
+        last_name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role as 'client' | 'provider'
+      };
+      
+      await authService.register(registrationData);
+      navigate('/login', { 
+        state: { 
+          message: 'Registration successful! Please check your email to verify your account before logging in.' 
+        } as { message: string }
+      });
     } catch (err: any) {
-      setError(err.response?.data?.msg || 'Registration failed');
+      const errorMessage = err.response?.data?.message || 
+                         err.response?.data?.error || 
+                         err.message || 
+                         'Registration failed. Please try again.';
+      setError(errorMessage);
+      console.error('Registration error:', err.response?.data || err);
     } finally {
       setLoading(false);
     }
@@ -61,20 +87,12 @@ export default function Register() {
           )}
           
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="First Name"
-                value={formData.first_name}
-                onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                required
-              />
-              <Input
-                label="Last Name"
-                value={formData.last_name}
-                onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                required
-              />
-            </div>
+            <Input
+              label="Full Name"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              required
+            />
             
             <Input
               label="Email Address"
@@ -90,11 +108,14 @@ export default function Register() {
               </label>
               <select
                 value={formData.role}
-                onChange={(e) => setFormData({...formData, role: e.target.value})}
+                onChange={(e) => setFormData({
+                  ...formData, 
+                  role: e.target.value as 'client' | 'provider'
+                })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
-                <option value="client">Client (Looking for services)</option>
-                <option value="provider">Service Provider</option>
+                <option value="client">I'm looking for services</option>
+                <option value="provider">I want to offer services</option>
               </select>
             </div>
             

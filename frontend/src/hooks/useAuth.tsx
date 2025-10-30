@@ -4,8 +4,13 @@ import { authService } from '../services/authService';
 interface User {
   id: string;
   email: string;
-  role: string;
-  name: string;
+  first_name: string;
+  last_name: string;
+  role: 'client' | 'provider' | 'admin';
+  is_verified: boolean;
+  created_at: string;
+  updated_at: string;
+  name?: string; // For backward compatibility
 }
 
 interface AuthContextType {
@@ -25,8 +30,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = localStorage.getItem('token');
     if (token) {
       authService.getCurrentUser()
-        .then(setUser)
-        .catch(() => localStorage.removeItem('token'))
+        .then(user => {
+          setUser({
+            ...user,
+            name: `${user.first_name} ${user.last_name}`.trim()
+          });
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+          setUser(null);
+        })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
@@ -34,9 +47,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const { user, token } = await authService.login(email, password);
-    localStorage.setItem('token', token);
-    setUser(user);
+    try {
+      const { access_token, user } = await authService.login({ email, password });
+      localStorage.setItem('token', access_token);
+      setUser({
+        ...user,
+        name: `${user.first_name} ${user.last_name}`.trim()
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error; // Re-throw to be handled by the component
+    }
   };
 
   const logout = () => {

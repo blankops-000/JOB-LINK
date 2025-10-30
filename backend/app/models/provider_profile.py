@@ -29,6 +29,8 @@ class ProviderProfile(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # RELATIONSHIPS
+    # One-to-one: A provider profile belongs to one user
+    user = db.relationship('User', back_populates='provider_profile')
     
     # One-to-many: A provider can have many reviews
     reviews = db.relationship('Review', backref='provider_profile', lazy='dynamic')
