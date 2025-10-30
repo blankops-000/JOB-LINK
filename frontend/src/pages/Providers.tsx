@@ -54,7 +54,7 @@ export default function Providers() {
     }
   };
 
-  const handleBookingSubmit = async (bookingData: any) => {
+  const handleBookingSubmit = async (bookingData: { provider_id: string; service_date: string; duration_hours: number; notes: string }) => {
     try {
       await api.post('/bookings', bookingData);
       setShowBookingModal(false);

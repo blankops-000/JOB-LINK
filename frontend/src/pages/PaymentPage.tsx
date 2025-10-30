@@ -37,8 +37,9 @@ export default function PaymentPage() {
           checkoutRequestId: response.data.checkout_request_id 
         } 
       });
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Payment initiation failed');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Payment initiation failed');
     } finally {
       setLoading(false);
     }

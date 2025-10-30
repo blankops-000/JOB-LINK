@@ -14,7 +14,12 @@ interface ProviderMapProps {
   center: [number, number];
 }
 
-const AnyMapContainer = MapContainer as unknown as any;
+const AnyMapContainer = MapContainer as React.ComponentType<{
+  center: [number, number];
+  zoom: number;
+  className: string;
+  children: React.ReactNode;
+}>;
 
 export default function ProviderMap({ providers, center }: ProviderMapProps) {
   return (

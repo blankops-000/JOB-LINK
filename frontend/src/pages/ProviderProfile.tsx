@@ -43,7 +43,7 @@ export default function ProviderProfile() {
     if (id) fetchProvider();
   }, [id]);
 
-  const handleBooking = async (bookingData: any) => {
+  const handleBooking = async (bookingData: { provider_id: string; service_date: string; duration_hours: number; notes: string }) => {
     try {
       await api.post('/bookings', bookingData);
       setShowBookingModal(false);
