@@ -8,6 +8,7 @@ from app.models.service_category import ServiceCategory
 from app.models.user import User
 from app.models.payment import Payment, PaymentStatus
 from app.utils.auth import admin_required, provider_required, client_required
+from app.utils.email_service import send_booking_confirmation, send_booking_notification
 
 bookings_bp = Blueprint('bookings', __name__)
 
@@ -70,6 +71,29 @@ def create_booking():
         
         db.session.add(booking)
         db.session.commit()
+        
+        # Send email notifications
+        client = User.query.get(current_user_id)
+        provider_user = User.query.get(data['provider_id'])
+        
+        if client and provider_user:
+            # Send confirmation to client
+            send_booking_confirmation(
+                client.email,
+                f"{client.first_name} {client.last_name}",
+                f"{provider_user.first_name} {provider_user.last_name}",
+                service_category.name,
+                scheduled_date.strftime('%Y-%m-%d %H:%M')
+            )
+            
+            # Send notification to provider
+            send_booking_notification(
+                provider_user.email,
+                f"{provider_user.first_name} {provider_user.last_name}",
+                f"{client.first_name} {client.last_name}",
+                service_category.name,
+                scheduled_date.strftime('%Y-%m-%d %H:%M')
+            )
         
         return jsonify({
             'message': 'Booking created successfully',

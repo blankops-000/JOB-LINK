@@ -2,10 +2,12 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app import db, bcrypt
 from app.models.user import User, RoleEnum
+from app.utils.email_service import send_verification_email
+import secrets
 
 # Make sure this line exists and the blueprint is named 'auth_bp'
 auth_bp = Blueprint('auth', __name__)  # This creates the auth_bp variable
-
+#==============Registration Route==================
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json() or {}
@@ -39,12 +41,24 @@ def register():
 
     db.session.add(user)
     db.session.commit()
+    
+    # Send verification email
+    verification_token = secrets.token_urlsafe(32)
+    # Store token in user record (you may need to add this field to User model)
+    # user.verification_token = verification_token
+    # db.session.commit()
+    
+    send_verification_email(
+        user.email,
+        f"{user.first_name} {user.last_name}",
+        verification_token
+    )
 
     return jsonify({
-        'msg': 'user registered',
+        'msg': 'user registered successfully. Please check your email for verification.',
         'user': user.to_dict()
     }), 201
-
+#==============Login Route==================
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
