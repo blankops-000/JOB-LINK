@@ -21,7 +21,7 @@ export default function Bookings() {
       try {
         const response = await api.get('/bookings');
         setBookings(response.data);
-      } catch (error) {
+      } catch {
         // Error fetching bookings
       } finally {
         setLoading(false);

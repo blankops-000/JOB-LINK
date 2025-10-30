@@ -11,7 +11,7 @@ interface BookingModalProps {
     name: string;
     hourly_rate: number;
   } | null;
-  onSubmit: (bookingData: any) => void;
+  onSubmit: (bookingData: { provider_id: string; service_date: string; duration_hours: number; notes: string }) => void;
 }
 
 export default function BookingModal({ isOpen, onClose, provider, onSubmit }: BookingModalProps) {

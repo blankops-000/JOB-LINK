@@ -44,8 +44,9 @@ const SignUp = () => {
       };
       await authService.register(userData);
       navigate('/signin', { state: { message: 'Registration successful! Please sign in.' } });
-    } catch (err: any) {
-      setError(err.response?.data?.msg || 'Registration failed');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { msg?: string } } };
+      setError(error.response?.data?.msg || 'Registration failed');
     } finally {
       setLoading(false);
     }
