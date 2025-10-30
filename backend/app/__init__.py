@@ -26,6 +26,16 @@ def create_app():
     jwt.init_app(app)
     migrate.init_app(app, db)
     
+    # Add JWT claims loader to include user role in token
+    @jwt.additional_claims_loader
+    def add_claims_to_jwt(identity):
+        from app.models.user import User
+        # Convert identity back to int for database query
+        user = User.query.get(int(identity))
+        if user:
+            return {'role': user.role.value}
+        return {'role': None}
+    
     cors.init_app(app, resources={
         r"/api/*": {
             "origins": app.config.get('CORS_ORIGINS', ['http://localhost:3000'])
@@ -69,5 +79,22 @@ def create_app():
         app.register_blueprint(admin_bp, url_prefix='/api/admin')
     except ImportError:
         print("⚠️  Admin routes not yet created - skipping")
-        # Add to imports
+    
+    try:
+        from app.routes.payments import payments_bp
+        app.register_blueprint(payments_bp, url_prefix='/api/payments')
+    except ImportError:
+        print("⚠️  Payment routes not yet created - skipping")
+    
+    try:
+        from app.routes.uploads import uploads_bp
+        app.register_blueprint(uploads_bp, url_prefix='/api/uploads')
+    except ImportError:
+        print("⚠️  Upload routes not yet created - skipping")
+    
+    # Add health check endpoint
+    @app.route('/health')
+    def health_check():
+        return {'status': 'healthy', 'service': 'joblink-backend'}, 200
+    
     return app

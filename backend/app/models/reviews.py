@@ -10,6 +10,8 @@ class Review(db.Model):
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'), nullable=False, unique=True)
     # Which client wrote this review
     client_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    # Which provider (user) this review is about
+    provider_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     # Which provider profile this review is about
     provider_profile_id = db.Column(db.Integer, db.ForeignKey('provider_profiles.id'), nullable=False)
     # Rating from 1-5 stars
@@ -24,6 +26,7 @@ class Review(db.Model):
             'id': self.id,
             'booking_id': self.booking_id,
             'client_id': self.client_id,
+            'provider_id': self.provider_id,
             'provider_profile_id': self.provider_profile_id,
             'rating': self.rating,
             'comment': self.comment,

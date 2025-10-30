@@ -9,18 +9,23 @@ auth_bp = Blueprint('auth', __name__)  # This creates the auth_bp variable
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json() or {}
-    username = data.get('username')
+    
+    # Accept either 'name' or split 'first_name'/'last_name'
+    name = data.get('name', '')
+    first_name = data.get('first_name', name.split()[0] if name else '')
+    last_name = data.get('last_name', ' '.join(name.split()[1:]) if len(name.split()) > 1 else '')
+    
     email = data.get('email')
     password = data.get('password')
     role = data.get('role')
 
-    if not username or not email or not password:
-        return jsonify({'msg': 'username, email and password are required'}), 400
+    if not first_name or not email or not password:
+        return jsonify({'msg': 'name, email and password are required'}), 400
 
-    # check for existing user by username or email
-    existing = User.query.filter((User.username == username) | (User.email == email)).first()
+    # check for existing user by email
+    existing = User.query.filter(User.email == email).first()
     if existing:
-        return jsonify({'msg': 'user with given username or email already exists'}), 409
+        return jsonify({'msg': 'user with given email already exists'}), 409
 
     # hash password
     try:
@@ -29,7 +34,7 @@ def register():
         # fallback if generate_password_hash returns a str already
         pw_hash = bcrypt.generate_password_hash(password)
 
-    user = User(username=username, email=email, password=pw_hash)
+    user = User(first_name=first_name, last_name=last_name, email=email, password_hash=pw_hash)
 
     # attempt to set role if provided and valid
     if role:
@@ -47,32 +52,39 @@ def register():
 
     return jsonify({
         'msg': 'user registered',
-        'user': {'id': user.id, 'username': user.username, 'email': user.email}
+        'user': {
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'role': user.role.value
+        }
     }), 201
 
 @auth_bp.route('/login', methods=['POST'])  
 def login():
     data = request.get_json() or {}
-    identifier = data.get('email') or data.get('username') or data.get('identifier')
+    email = data.get('email')
     password = data.get('password')
 
-    if not identifier or not password:
-        return jsonify({'msg': 'identifier and password required'}), 400
+    if not email or not password:
+        return jsonify({'msg': 'email and password required'}), 400
 
-    user = User.query.filter((User.email == identifier) | (User.username == identifier)).first()
+    user = User.query.filter(User.email == email).first()
     if not user:
         return jsonify({'msg': 'invalid credentials'}), 401
 
-    if not bcrypt.check_password_hash(user.password, password):
+    if not bcrypt.check_password_hash(user.password_hash, password):
         return jsonify({'msg': 'invalid credentials'}), 401
 
-    access_token = create_access_token(identity=user.id)
-    user_info = {'id': user.id, 'username': user.username, 'email': user.email}
-    if hasattr(user, 'role') and user.role is not None:
-        try:
-            user_info['role'] = user.role.name
-        except Exception:
-            user_info['role'] = str(user.role)
+    access_token = create_access_token(identity=str(user.id))
+    user_info = {
+        'id': user.id,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email': user.email,
+        'role': user.role.value if user.role else 'client'
+    }
 
     return jsonify({'access_token': access_token, 'user': user_info}), 200
 
@@ -80,15 +92,16 @@ def login():
 @jwt_required()
 def get_current_user():
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    user = User.query.get(int(current_user_id))
     if not user:
         return jsonify({'msg': 'user not found'}), 404
 
-    user_info = {'id': user.id, 'username': user.username, 'email': user.email}
-    if hasattr(user, 'role') and user.role is not None:
-        try:
-            user_info['role'] = user.role.name
-        except Exception:
-            user_info['role'] = str(user.role)
+    user_info = {
+        'id': user.id,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email': user.email,
+        'role': user.role.value if user.role else 'client'
+    }
 
     return jsonify({'user': user_info}), 200

@@ -6,7 +6,7 @@ from app import db
 from app.models.user import User, RoleEnum
 from app.models.provider_profile import ProviderProfile
 from app.models.booking import Booking, BookingStatus
-from app.models.review import Review  # Make sure this import is correct
+from app.models.reviews import Review
 from app.models.payment import Payment, PaymentStatus
 from app.models.service_category import ServiceCategory
 from app.utils.auth import admin_required

@@ -31,7 +31,8 @@ export default function Register() {
       await authService.register(formData);
       navigate('/login', { state: { message: 'Registration successful! Please login.' } });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.msg || err.message || 'Registration failed');
+      console.error('Registration error:', err.response?.data || err);
     } finally {
       setLoading(false);
     }
