@@ -95,6 +95,27 @@ def create_app():
     except ImportError as e:
         print(f"[WARN] Admin routes import failed: {e}")
         
+    try:
+        from app.routes.integrations import integrations_bp
+        app.register_blueprint(integrations_bp, url_prefix='/api/integrations')
+        print("[OK] Integrations routes registered")
+    except ImportError as e:
+        print(f"[WARN] Integrations routes import failed: {e}")
+        
+    try:
+        from app.routes.geo import geo_bp
+        app.register_blueprint(geo_bp, url_prefix='/api/geo')
+        print("[OK] Geo routes registered")
+    except ImportError as e:
+        print(f"[WARN] Geo routes import failed: {e}")
+        
+    try:
+        from app.routes.payments import payments_bp
+        app.register_blueprint(payments_bp, url_prefix='/api/payments')
+        print("[OK] Payments routes registered")
+    except ImportError as e:
+        print(f"[WARN] Payments routes import failed: {e}")
+        
     # Add health check endpoint
     @app.route('/health')
     def health_check():

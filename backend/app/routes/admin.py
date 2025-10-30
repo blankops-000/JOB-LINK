@@ -299,3 +299,102 @@ def get_admin_stats():
         
     except Exception as e:
         return jsonify({'error': 'Failed to fetch admin statistics', 'details': str(e)}), 500
+
+@admin_bp.route('/analytics/total-jobs', methods=['GET'])
+@jwt_required()
+@admin_required
+def get_total_jobs():
+    """Get total jobs analytics"""
+    try:
+        total_jobs = Booking.query.count()
+        completed_jobs = Booking.query.filter_by(status=BookingStatus.COMPLETED).count()
+        pending_jobs = Booking.query.filter_by(status=BookingStatus.PENDING).count()
+        
+        return jsonify({
+            'total_jobs': total_jobs,
+            'completed_jobs': completed_jobs,
+            'pending_jobs': pending_jobs,
+            'completion_rate': (completed_jobs / total_jobs * 100) if total_jobs > 0 else 0
+        }), 200
+    except Exception as e:
+        return jsonify({'error': 'Failed to fetch job analytics', 'details': str(e)}), 500
+
+@admin_bp.route('/analytics/total-users', methods=['GET'])
+@jwt_required()
+@admin_required
+def get_total_users_analytics():
+    """Get total users analytics"""
+    try:
+        total_users = User.query.count()
+        clients = User.query.filter_by(role=RoleEnum.CLIENT).count()
+        providers = User.query.filter_by(role=RoleEnum.PROVIDER).count()
+        
+        return jsonify({
+            'total_users': total_users,
+            'clients': clients,
+            'providers': providers,
+            'client_percentage': (clients / total_users * 100) if total_users > 0 else 0,
+            'provider_percentage': (providers / total_users * 100) if total_users > 0 else 0
+        }), 200
+    except Exception as e:
+        return jsonify({'error': 'Failed to fetch user analytics', 'details': str(e)}), 500
+
+@admin_bp.route('/analytics/top-providers', methods=['GET'])
+@jwt_required()
+@admin_required
+def get_top_providers():
+    """Get top providers by bookings and ratings"""
+    try:
+        limit = request.args.get('limit', 10, type=int)
+        
+        # Top providers by booking count
+        top_by_bookings = db.session.query(
+            User.first_name,
+            User.last_name,
+            User.id,
+            ProviderProfile.business_name,
+            func.count(Booking.id).label('booking_count')
+        ).join(ProviderProfile, User.id == ProviderProfile.user_id)\
+         .join(Booking, User.id == Booking.provider_id)\
+         .group_by(User.id, ProviderProfile.business_name)\
+         .order_by(desc('booking_count'))\
+         .limit(limit).all()
+        
+        # Top providers by rating
+        top_by_rating = db.session.query(
+            User.first_name,
+            User.last_name,
+            User.id,
+            ProviderProfile.business_name,
+            ProviderProfile.average_rating,
+            func.count(Review.id).label('review_count')
+        ).join(ProviderProfile, User.id == ProviderProfile.user_id)\
+         .outerjoin(Review, User.id == Review.provider_id)\
+         .filter(ProviderProfile.average_rating.isnot(None))\
+         .group_by(User.id, ProviderProfile.business_name, ProviderProfile.average_rating)\
+         .order_by(desc(ProviderProfile.average_rating))\
+         .limit(limit).all()
+        
+        return jsonify({
+            'top_by_bookings': [
+                {
+                    'provider_id': provider_id,
+                    'name': f'{first_name} {last_name}',
+                    'business_name': business_name,
+                    'booking_count': booking_count
+                }
+                for first_name, last_name, provider_id, business_name, booking_count in top_by_bookings
+            ],
+            'top_by_rating': [
+                {
+                    'provider_id': provider_id,
+                    'name': f'{first_name} {last_name}',
+                    'business_name': business_name,
+                    'average_rating': float(average_rating) if average_rating else 0,
+                    'review_count': review_count
+                }
+                for first_name, last_name, provider_id, business_name, average_rating, review_count in top_by_rating
+            ]
+        }), 200
+    except Exception as e:
+        return jsonify({'error': 'Failed to fetch top providers', 'details': str(e)}), 500
