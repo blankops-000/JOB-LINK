@@ -5,12 +5,18 @@ import Input from '../components/Input';
 import Button from '../components/Button';
 
 export default function Register() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    role: 'client' | 'provider';
+  }>({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'client' as const
+    role: 'client'
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
